@@ -3,1832 +3,279 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EMC - Welcome Slides</title>
+  <title>Presentation Viewer</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
     body {
-      background: linear-gradient(135deg, #1e3c72, #2a5298);
-      background-size: cover;
-      background-position: center;
-      height: 100vh;
+      font-family: Arial, sans-serif;
+      background-color: #1a1a1a;
+      color: #fff;
       display: flex;
-      align-items: center;
       justify-content: center;
-      color: white;
+      align-items: center;
+      min-height: 100vh;
+    }
+    #app-container {
       position: relative;
+      width: 100%;
+      max-width: 1280px;
+      aspect-ratio: 16 / 9;
+      background-color: #000;
       overflow: hidden;
-      overflow-x: hidden;
-      transition: background-image 0.5s ease-in-out;
-    }
-
-    .overlay {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.4); z-index: 1;
-      transition: backdrop-filter 0.5s ease;
-    }
-
-    /* Top Navigation Zone */
-    .top-controls-zone {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      display: none;
-      gap: 10px;
-      z-index: 99999;
-      opacity: 1;
-      transition: opacity 0.3s ease;
-    }
-
-    .top-controls-zone.presentation-mode { opacity: 0; }
-    .top-controls-zone.presentation-mode:hover { opacity: 1; }
-
-    .back-btn, .home-btn {
-      background: rgba(0, 0, 0, 0.85);
-      color: #fff;
-      border: 2px solid #fff;
-      padding: 8px 18px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 0.95rem;
-      transition: background 0.2s, color 0.2s, border-color 0.2s;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    }
-
-    .home-btn { padding: 8px 12px; font-size: 1.1rem; line-height: 1; }
-    .back-btn:hover, .home-btn:hover { background: cyan; color: #000; border-color: #000; }
-
-    /* Upper Right Hamburger & Slide Drawer Container */
-    #slideDrawerContainer {
-      position: fixed;
-      top: 0;
-      right: 0;
-      width: 320px;
-      height: 100vh;
-      z-index: 100000;
-      display: none;
-      pointer-events: none;
-    }
-
-    #slideDrawerBtn {
-      position: fixed;
-      top: 15px;
-      right: 20px;
-      background: rgba(0, 0, 0, 0.85);
-      color: #fff;
-      border: 2px solid #fff;
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 1.2rem;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-      opacity: 0;
-      transition: opacity 0.3s ease, background 0.2s, color 0.2s;
-      z-index: 100001;
-      pointer-events: auto;
-    }
-
-    #slideDrawerContainer:hover #slideDrawerBtn,
-    #slideDrawerBtn:hover {
-      opacity: 1;
-    }
-
-    #slideDrawerBtn:hover {
-      background: cyan;
-      color: #000;
-      border-color: #000;
-    }
-
-    /* Sliding Drawer Window */
-    #slideDrawerMenu {
-      position: fixed;
-      top: 0;
-      right: 0;
-      width: 290px;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.92);
-      border-left: 2px solid cyan;
-      box-shadow: none;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      transform: translateX(100%);
-      transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.35s ease;
       display: flex;
       flex-direction: column;
-      z-index: 100000;
-      pointer-events: auto;
     }
-
-    #slideDrawerMenu.open {
-      transform: translateX(0);
-      box-shadow: -8px 0 24px rgba(0, 0, 0, 0.8);
-    }
-
-    .drawer-header {
-      padding: 16px 18px;
-      font-weight: bold;
-      font-size: 1.05rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-      color: cyan;
+    #slide-viewport {
+      flex: 1;
+      position: relative;
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
     }
-
-    #slideListItems {
-      flex: 1;
+    #slide-image {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    #controls-bar {
+      height: 60px;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+    }
+    .btn-group {
+      display: flex;
+      gap: 10px;
+    }
+    button {
+      padding: 8px 16px;
+      background: #333;
+      color: #fff;
+      border: 1px solid #555;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    button:hover {
+      background: #555;
+    }
+    #drawer {
+      position: absolute;
+      right: -300px;
+      top: 0;
+      width: 300px;
+      height: 100%;
+      background: #222;
+      transition: right 0.3s ease;
       overflow-y: auto;
       padding: 10px;
     }
-
-    .slide-item {
-      padding: 8px 10px;
-      font-size: 0.9rem;
-      color: #ddd;
-      cursor: pointer;
-      border-radius: 8px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      transition: background 0.15s, color 0.15s;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 6px;
-    }
-
-    .slide-item:hover, .slide-item.active-slide-item {
-      background: rgba(0, 229, 255, 0.2);
-      color: cyan;
-      font-weight: bold;
-    }
-
-    .slide-thumb {
-      width: 64px;
-      height: 38px;
-      object-fit: cover;
-      border-radius: 4px;
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      background: #111;
-    }
-
-    /* Landing Card */
-    .container {
-      position: relative; z-index: 2;
-      width: 540px; min-height: 280px; padding: 24px 20px;
-      border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-      display: flex; flex-direction: column; justify-content: center; align-items: center;
-      text-align: center;
-      background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    /* News Ticker Styling */
-    .ticker-wrap {
-      position: absolute; top: 0; left: 0; width: 100%;
-      z-index: 100; overflow: hidden;
-      background: rgba(0, 0, 0, 0.35);
-      backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-      padding: 10px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-      white-space: nowrap;
-    }
-
-    .ticker-content {
-      display: inline-block; white-space: nowrap; padding-left: 100%;
-      animation: ticker 40s linear infinite;
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: rgba(255, 255, 255, 0.95);
-      letter-spacing: 0.5px;
-    }
-
-    @keyframes ticker {
-      0% { transform: translate3d(0, 0, 0); }
-      100% { transform: translate3d(-100%, 0, 0); }
-    }
-
-    /* TOC Screens */
-    .toc-screen {
-      display: none; position: relative; z-index: 2;
-      width: 850px; height: 480px; padding: 20px;
-      background: transparent; box-shadow: none;
-      flex-direction: column; align-items: center; justify-content: center;
-    }
-
-    .date { font-size: 1.35rem; font-weight: 600; margin-top: -5px; margin-bottom: 8px; color: rgba(255, 255, 255, 0.95); letter-spacing: 0.5px; }
-    h1 { font-size: 2.7rem; margin-bottom: 8px; }
-    .quote { font-style: italic; font-size: 1.15rem; margin-bottom: 20px; line-height: 1.4; min-height: 52px; }
-
-    .toc-screen h2 { 
-      margin-top: 0;
-      margin-bottom: 12px; 
-      color: white; 
-      text-align: center; 
-      font-size: 2.2rem; 
-      font-weight: 800; 
-      text-transform: uppercase;
-      letter-spacing: 1px; 
-      text-shadow: 0 2px 4px rgba(0,0,0,0.6);
-    }
-
-    #sp-screen {
-      width: 98vw;
-      height: 85vh;
-      justify-content: flex-start;
-      padding-top: 15px;
-    }
-
-    /* Layout Containers */
-    .comic-container { display: flex; gap: 60px; width: 100%; justify-content: center; align-items: center; }
-    .three-card-container { gap: 30px; }
-
-    .sp-container {
-      gap: 15px; 
-      flex-wrap: wrap; 
-      width: 100%; 
-      max-width: 100%; 
-      height: 100%; 
-      max-height: calc(85vh - 70px); 
-      justify-content: center; 
-      overflow-y: auto; 
-      padding: 10px 15px;
-    }
-
-    /* Cards */
-    .comic-card {
-      flex: 1; max-width: 310px; aspect-ratio: 4 / 3;
-      position: relative; border: 3px solid #ffffff; border-radius: 12px;
-      overflow: hidden; cursor: pointer; background: #000;
-      box-shadow: 6px 6px 0px rgba(0,0,0,0.6);
-      transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-
-    .three-card-container .comic-card { max-width: 220px; }
-
-    .sp-card {
-      flex: 0 0 230px; max-width: 230px !important; aspect-ratio: 16 / 9;
-      display: flex; align-items: center; justify-content: center;
-      background: rgba(0, 0, 0, 0.75); padding: 10px; text-align: center;
-    }
-
-    .sp-card:hover {
-      transform: translateY(-6px) scale(1.04);
-      border-color: cyan;
-      box-shadow: 0 8px 18px rgba(0, 229, 255, 0.4);
-    }
-
-    .sp-text {
-      font-size: 1.1rem; font-weight: 800; color: #fff;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.8); letter-spacing: 0.5px; word-break: break-word;
-    }
-
-    .sp-card:hover .sp-text { color: cyan; }
-
-    .comic-card:hover {
-      transform: translateY(-8px) scale(1.04) rotate(-1deg);
-      box-shadow: 8px 12px 0px #00e5ff; border-color: #00e5ff;
-    }
-
-    .comic-card:nth-child(2):hover { transform: translateY(-8px) scale(1.04) rotate(1deg); }
-    .card-img-wrapper { width: 100%; height: 100%; overflow: hidden; }
-    .card-img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
-    .comic-card:hover .card-img-wrapper img { transform: scale(1.1); }
-
-    .card-label {
-      position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
-      background: #000; color: #fff; font-weight: 900; font-size: 1rem;
-      padding: 4px 16px; border-radius: 20px; border: 2px solid #fff;
-      letter-spacing: 1px; text-transform: uppercase;
-      box-shadow: 2px 2px 0px rgba(0,0,0,0.5); transition: background 0.2s, color 0.2s;
-    }
-
-    .comic-card:hover .card-label { background: cyan; color: #000; border-color: #000; }
-
-    .btn {
-      background: #27ae60; color: white; border: none; padding: 12px 35px;
-      font-size: 1.1rem; font-weight: bold; border-radius: 8px; cursor: pointer;
-      transition: background 0.2s; margin-top: 5px;
-    }
-    .btn:hover { background: #219150; }
-
-    /* Viewer Screen */
-    .viewer-screen { width: 100vw; height: 100vh; padding: 0; }
-
-    .viewer-container {
-      position: relative; width: 100vw; height: 100vh;
-      border: none; border-radius: 0; overflow: hidden; background: #000;
-      box-shadow: none; display: flex; align-items: center; justify-content: center;
-      perspective: 1500px;
-    }
-
-    .viewer-container img { width: 100%; height: 100%; object-fit: cover; backface-visibility: hidden; display: block; }
-
-    @keyframes slideRightToLeft {
-      0% { opacity: 0; transform: translateX(100%); }
-      100% { opacity: 1; transform: translateX(0); }
-    }
-
-    .slide-animate { animation: slideRightToLeft 0.45s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
-
-    /* Slideshow Bottom Controls Bar */
-    .controls-bar {
-      position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
-      display: flex; gap: 15px; background: rgba(0, 0, 0, 0.85);
-      padding: 12px 24px; border-radius: 30px; border: 1.5px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6); opacity: 0; transition: opacity 0.3s ease; z-index: 10;
-    }
-
-    .controls-bar:hover { opacity: 1; }
-
-    .ctrl-btn {
-      background: rgba(255, 255, 255, 0.15); color: white;
-      border: 1.5px solid rgba(255, 255, 255, 0.4);
-      padding: 8px 20px; border-radius: 18px; cursor: pointer;
-      font-weight: 600; font-size: 0.95rem; transition: all 0.2s ease;
-    }
-
-    .ctrl-btn:hover { background: cyan; color: #000; border-color: cyan; box-shadow: 0 0 10px cyan; }
-    .ctrl-btn.active-shuffle { background: #00e5ff; color: #000; font-weight: 800; border-color: #00e5ff; box-shadow: 0 0 12px #00e5ff; }
-    .ctrl-btn.active-play { background: #e74c3c; color: #fff; border-color: #e74c3c; }
-    .ctrl-btn.active-pause { background: #f39c12; color: #fff; border-color: #f39c12; }
-
-    /* Music Player Controls */
-    #musicContainer { position: fixed; bottom: 25px; left: 20px; z-index: 100000; display: none; opacity: 0; transition: opacity 0.3s ease; }
-    #musicContainer:hover, #musicContainer:focus-within { opacity: 1; }
-    #musicBar { display: flex; align-items: center; gap: 10px; }
-
-    #musicSelectBtn, .music-ctrl-btn {
-      background: rgba(0, 0, 0, 0.85); color: #fff; border: 2px solid #fff;
-      padding: 8px 18px; border-radius: 20px; cursor: pointer;
-      font-weight: bold; font-size: 0.95rem; transition: background 0.2s, color 0.2s, border-color 0.2s;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); white-space: nowrap;
-    }
-
-    #musicSelectBtn:hover, .music-ctrl-btn:hover { background: cyan; color: #000; border-color: #000; }
-    #musicControls { display: flex; align-items: center; gap: 10px; }
-    .music-ctrl-btn { padding: 8px 14px; }
-    #volumeWrapper { position: relative; display: flex; align-items: center; }
-
-    #volSliderBox {
-      display: none; position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.9); border: 2px solid #fff; padding: 12px 8px;
-      border-radius: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.7);
-      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    }
-
-    #volSlider { writing-mode: bt-lr; appearance: slider-vertical; width: 14px; height: 80px; accent-color: cyan; cursor: pointer; }
-
-    #musicMenu {
-      display: none; position: absolute; bottom: 55px; left: 0; width: 250px;
-      background: rgba(0, 0, 0, 0.9); border: 2px solid #fff; border-radius: 16px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7); overflow: hidden;
-      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    }
-
-    .menu-search-box { padding: 8px; background: rgba(255, 255, 255, 0.1); border-bottom: 1px solid rgba(255, 255, 255, 0.2); }
-    #musicSearchInput { width: 100%; padding: 6px 12px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 12px; color: #fff; font-size: 13px; outline: none; }
-    #musicSearchInput:focus { border-color: cyan; box-shadow: 0 0 8px rgba(0, 229, 255, 0.5); }
-    #songListItems { max-height: 180px; overflow-y: auto; }
-    .menu-item { padding: 10px 14px; font-size: 13.5px; color: #ddd; cursor: pointer; border-bottom: 1px solid rgba(255, 255, 255, 0.08); transition: background 0.15s, color 0.15s; }
-    .menu-item:hover { background: rgba(0, 229, 255, 0.2); color: cyan; font-weight: bold; }
-
-    /* Slide Duration Controls (Bottom Right) */
-    #durationContainer {
-      position: fixed;
-      bottom: 25px;
-      right: 20px;
-      z-index: 100000;
-      display: none;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    #durationContainer:hover, #durationContainer:focus-within {
-      opacity: 1;
-    }
-
-    #durationSelectBtn {
-      background: rgba(0, 0, 0, 0.85);
-      color: #fff;
-      border: 2px solid #fff;
-      padding: 8px 18px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 0.95rem;
-      transition: background 0.2s, color 0.2s, border-color 0.2s;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-      white-space: nowrap;
-    }
-
-    #durationSelectBtn:hover {
-      background: cyan;
-      color: #000;
-      border-color: #000;
-    }
-
-    #durationMenu {
-      display: none;
-      position: absolute;
-      bottom: 55px;
+    #drawer.open {
       right: 0;
-      width: 120px;
-      background: rgba(0, 0, 0, 0.9);
-      border: 2px solid #fff;
-      border-radius: 16px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
-      overflow: hidden;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+    }
+    .drawer-item {
+      margin-bottom: 10px;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+    .drawer-item.active {
+      border-color: #00aaff;
+    }
+    .drawer-item img {
+      width: 100%;
+      display: block;
     }
   </style>
 </head>
 <body>
 
-  <div class="top-controls-zone" id="top-nav">
-    <button class="back-btn" onclick="handleBackNav()">← Back</button>
-    <button class="home-btn" onclick="goHome()">🏠</button>
-  </div>
-
-  <div id="slideDrawerContainer">
-    <button id="slideDrawerBtn" onclick="toggleSlideDrawer(event)">☰</button>
-    <div id="slideDrawerMenu" onclick="event.stopPropagation()">
-      <div class="drawer-header">
-        <span>Slide Thumbnails</span>
-      </div>
-      <div id="slideListItems"></div>
+  <div id="app-container">
+    <div id="slide-viewport">
+      <img id="slide-image" src="" alt="Slide Viewport">
     </div>
-  </div>
 
-  <div class="overlay" id="bg-overlay"></div>
-
-  <div class="container" id="landing-screen">
-    <div class="date" id="current-date">Loading date...</div>
-    <h1><span style="color: cyan;">E</span>ducam <span style="color: cyan;">M</span>anila <span style="color: cyan;">C</span>orp.</h1>
-    <div class="quote" id="daily-quote">"Loading quote..."</div>
-    <button class="btn" onclick="showTOC()">Let's go!</button>
-  </div>
-
-  <div class="toc-screen" id="toc-screen">
-    <h2>Student</h2>
-    
-    <div class="comic-container">
-      <div class="comic-card" onclick="selectAudience('Junior')">
-        <div class="card-img-wrapper">
-          <img src="assets/Junior.png" alt="Junior Category">
-        </div>
-        <div class="card-label">Junior</div>
+    <div id="controls-bar">
+      <div class="btn-group">
+        <button id="prev-btn">Prev</button>
+        <button id="play-btn">Play</button>
+        <button id="next-btn">Next</button>
       </div>
-
-      <div class="comic-card" onclick="selectAudience('Adult')">
-        <div class="card-img-wrapper">
-          <img src="assets/Adult.png" alt="Adult Category">
-        </div>
-        <div class="card-label">Adult</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="toc-screen" id="junior-screen">
-    <h2>Junior Levels</h2>
-    
-    <div class="comic-container three-card-container">
-      <div class="comic-card" onclick="selectLevel('Junior', 'Beginner')">
-        <div class="card-img-wrapper">
-          <img src="assets/beginner.png" alt="Beginner">
-        </div>
-        <div class="card-label">Beginner</div>
-      </div>
-
-      <div class="comic-card" onclick="selectLevel('Junior', 'Intermediate')">
-        <div class="card-img-wrapper">
-          <img src="assets/intermediate.png" alt="Intermediate">
-        </div>
-        <div class="card-label">Intermediate</div>
-      </div>
-
-      <div class="comic-card" onclick="selectLevel('Junior', 'Advanced')">
-        <div class="card-img-wrapper">
-          <img src="assets/advanced.png" alt="Advanced">
-        </div>
-        <div class="card-label">Advanced</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="toc-screen" id="adult-screen">
-    <h2>Adult Levels</h2>
-    
-    <div class="comic-container three-card-container">
-      <div class="comic-card" onclick="selectLevel('Adult', 'Beginner')">
-        <div class="card-img-wrapper">
-          <img src="assets/beginner.png" alt="Beginner">
-        </div>
-        <div class="card-label">Beginner</div>
-      </div>
-
-      <div class="comic-card" onclick="selectLevel('Adult', 'Intermediate')">
-        <div class="card-img-wrapper">
-          <img src="assets/intermediate.png" alt="Intermediate">
-        </div>
-        <div class="card-label">Intermediate</div>
-      </div>
-
-      <div class="comic-card" onclick="selectLevel('Adult', 'Advanced')">
-        <div class="card-img-wrapper">
-          <img src="assets/advanced.png" alt="Advanced">
-        </div>
-        <div class="card-label">Advanced</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="toc-screen" id="sp-screen">
-    <h2 id="sp-header-title">Select Module</h2>
-    <div class="comic-container sp-container" id="sp-card-container"></div>
-  </div>
-
-  <div class="toc-screen viewer-screen" id="viewer-screen">
-    <div class="ticker-wrap">
-      <div class="ticker-content">
-        WELCOME! Please enjoy some additional knowledge while we prepare. We are excited to start the class with you! 선생님이 열심히 수업을 준비 중이에요! 아래 단어들을 보면서 가볍게 몸을 풀어보세요. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; WELCOME! Please enjoy some additional knowledge while we prepare. We are excited to start the class with you! 선생님이 열심히 수업을 준비 중이에요! 아래 단어들을 보면서 가볍게 몸을 풀어보세요.
+      <div class="btn-group">
+        <button id="drawer-toggle">Slides</button>
       </div>
     </div>
 
-    <div class="viewer-container" id="viewer-container">
-      <img id="slide-image" src="" alt="Slide Presentation">
-
-      <div class="controls-bar" id="controls-bar">
-        <button class="ctrl-btn" id="prev-btn" onclick="prevSlide()">⏮</button>
-        <button class="ctrl-btn" id="play-stop-btn" onclick="togglePlayStop()">▶ Play</button>
-        <button class="ctrl-btn" id="pause-resume-btn" onclick="togglePauseResume()">⏸ Pause</button>
-        <button class="ctrl-btn" id="shuffle-btn" onclick="toggleShuffle()">🔀 Shuffle</button>
-        <button class="ctrl-btn" id="next-btn" onclick="nextSlide()">⏭</button>
-      </div>
-    </div>
+    <div id="drawer"></div>
   </div>
 
-  <div id="musicContainer">
-    <div id="musicBar">
-      <button id="musicSelectBtn">🎵 Select Music</button>
-
-      <div id="musicControls" style="display: none;">
-        <div id="volumeWrapper">
-          <button id="volBtn" class="music-ctrl-btn" title="Volume">🔊</button>
-          <div id="volSliderBox">
-            <input type="range" id="volSlider" min="0" max="1" step="0.05" value="1">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="musicMenu">
-      <div class="menu-search-box">
-        <input type="text" id="musicSearchInput" placeholder="🔍 Search song..." onclick="event.stopPropagation()">
-      </div>
-      <div id="songListItems"></div>
-    </div>
-  </div>
-
-  <!-- Slide Duration Selector -->
-  <div id="durationContainer">
-    <button id="durationSelectBtn" onclick="toggleDurationMenu(event)">⏱ 3 sec</button>
-    <div id="durationMenu">
-      <div class="menu-item" onclick="selectDuration(3)">3 sec</div>
-      <div class="menu-item" onclick="selectDuration(4)">4 sec</div>
-      <div class="menu-item" onclick="selectDuration(5)">5 sec</div>
-      <div class="menu-item" onclick="selectDuration(8)">8 sec</div>
-      <div class="menu-item" onclick="selectDuration(10)">10 sec</div>
-      <div class="menu-item" onclick="selectDuration(12)">12 sec</div>
-      <div class="menu-item" onclick="selectDuration(15)">15 sec</div>
-      <div class="menu-item" onclick="selectDuration(18)">18 sec</div>
-      <div class="menu-item" onclick="selectDuration(20)">20 sec</div>
-    </div>
-  </div>
-
-  <audio id="bgMusicAudio" loop></audio>
+  <audio id="audio-player"></audio>
 
   <script>
-    let activeAudience = '';
-    let activeLevel = '';
-    let activeSP = '';
+    const CLOUDFLARE_BASE_URL = "https://emc-welcome.pages.dev/";
 
+    let activeAudience = "Audience1";
+    let activeLevel = "Level1";
+    let activeSP = "SP1";
+
+    let slideOrder = [];
     let currentSlideIndex = 0;
     let isPlaying = false;
-    let isPaused = false;
-    let isShuffled = false;
-    let slideInterval = null;
-    let selectedDuration = 3000; // Default: 3 seconds
-    let slideOrder = [1];
     let workingTemplate = null;
 
-    // FOLDER LIST DEFINITIONS (JUNIOR)
-    const beginnerFolders = [
-      "Action Verbs 1",
-      "Animals 1",
-      "Body Parts 1",
-      "Colors and Shapes 1",
-      "Feelings 1",
-      "Food 1",
-      "Fruits and Vegetables 1",
-      "Numbers 1",
-      "School Objects 1",
-      "SP1 Vocabs",
-      "SP2 Vocabs",
-      "SP3 Vocabs",
-      "SP4 Vocabs",
-      "SP5 Vocabs",
-      "Weather 1"
-    ];
+    const slideImage = document.getElementById('slide-image');
+    const audioPlayer = document.getElementById('audio-player');
+    const playBtn = document.getElementById('play-btn');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const drawerToggle = document.getElementById('drawer-toggle');
+    const drawer = document.getElementById('drawer');
 
-    const juniorIntermediateFolders = [
-      "Action Verbs 2",
-      "Action Verbs 3",
-      "Animals 2",
-      "Animals 3",
-      "Body Parts 2",
-      "Clothing 1",
-      "Clothing 2",
-      "Everyday Expressions 1",
-      "Everyday Expressions 2",
-      "Food 2",
-      "Food 3",
-      "Fruits and Vegetables 2",
-      "Grammar Rules 1",
-      "Hobbies 1",
-      "Hobbies 2",
-      "House and Furniture 1",
-      "House and Furniture 2",
-      "Jobs 1",
-      "Jobs 2",
-      "Numbers 2",
-      "Places 1",
-      "Places 2",
-      "Shapes and Colors 2",
-      "Transportation and Vehicles"
-    ];
-
-    const advancedFolders = [
-      "Figures of Speech - Alliteration 1",
-      "Figures of Speech - Alliteration 2",
-      "Figures of Speech - Alliteration 3",
-      "Figures of Speech - Hyperbole 1",
-      "Figures of Speech - Hyperbole 2",
-      "Figures of Speech - Hyperbole 3",
-      "Figures of Speech - Idiom 1",
-      "Figures of Speech - Idiom 2",
-      "Figures of Speech - Idiom 3",
-      "Figures of Speech - Metaphor 1",
-      "Figures of Speech - Metaphor 2",
-      "Figures of Speech - Metaphor 3",
-      "Figures of Speech - Onomatopoeia 1",
-      "Figures of Speech - Onomatopoeia 2",
-      "Figures of Speech - Onomatopoeia 3",
-      "Figures of Speech - Oxymoron 1",
-      "Figures of Speech - Oxymoron 2",
-      "Figures of Speech - Oxymoron 3",
-      "Figures of Speech - Personification 1",
-      "Figures of Speech - Personification 2",
-      "Figures of Speech - Personification 3",
-      "Figures of Speech - Simile 1",
-      "Figures of Speech - Simile 2",
-      "Figures of Speech - Simile 3",
-      "Motivational Quotes 1",
-      "Motivational Quotes 2",
-      "Motivational Quotes 3",
-      "Motivational Quotes 4",
-      "Motivational Quotes 5",
-      "Motivational Quotes 6",
-      "Reading Rocket 1.1",
-      "Reading Rocket 1.2",
-      "Reading Rocket 2.1",
-      "Reading Rocket 2.2",
-      "Reading Rocket 3.1",
-      "Reading Rocket 3.2",
-      "Reading Town 1.1",
-      "Reading Town 1.2",
-      "Reading Town 2.1",
-      "Reading Town 2.2",
-      "Reading Town 3.1",
-      "Reading Town 3.2",
-      "Reading World 1.1",
-      "Reading World 1.2",
-      "Reading World 2.1",
-      "Reading World 2.2",
-      "Reading World 3.1",
-      "Reading World 3.2"
-    ];
-
-    const juniorAdvancedFolders = advancedFolders;
-
-    // FOLDER LIST DEFINITIONS (ADULT)
-    const adultBeginnerFolders = [
-      "Schedule 1"
-    ];
-
-    const defaultSPFolders = ["SP1", "SP2", "SP3", "SP4", "SP5"];
-
-    const wallpapers = [
-      "assets/Wallpapers/acoolrocket-dalle2-hokusai-non-prompt-landscape.png",
-      "assets/Wallpapers/afreen-red-sunset-horizon.png",
-      "assets/Wallpapers/alejagalesa-another-world.jpg",
-      "assets/Wallpapers/alejagalesa-calm-day.jpg",
-      "assets/Wallpapers/alejagalesa-camp.jpg",
-      "assets/Wallpapers/alejagalesa-horse-in-the-sunset.jpg",
-      "assets/Wallpapers/alejagalesa-modern-buildings.jpg",
-      "assets/Wallpapers/alejagalesa-mount-fuji.jpg",
-      "assets/Wallpapers/alejagalesa-multivist-landscape.jpg",
-      "assets/Wallpapers/alejagalesa-pink-landscape.jpg",
-      "assets/Wallpapers/alejagalesa-purple-bear.jpg",
-      "assets/Wallpapers/alejagalesa-starry-nigh.jpg",
-      "assets/Wallpapers/alejagalesa-the-beach-neighborhood.jpg",
-      "assets/Wallpapers/alejagalesa-the-city.jpg",
-      "assets/Wallpapers/alena-aenami-7pm.png",
-      "assets/Wallpapers/alena-aenami-any-minute-now.jpg",
-      "assets/Wallpapers/alena-aenami-around-us.jpg",
-      "assets/Wallpapers/alena-aenami-autumn-in-budapest.png",
-      "assets/Wallpapers/alena-aenami-away.jpg",
-      "assets/Wallpapers/alena-aenami-blue-hour.jpg",
-      "assets/Wallpapers/alena-aenami-castle-in-the-sky.jpg",
-      "assets/Wallpapers/alena-aenami-clouds.jpg",
-      "assets/Wallpapers/alena-aenami-dawn.jpg",
-      "assets/Wallpapers/alena-aenami-eclipse.jpg",
-      "assets/Wallpapers/alena-aenami-escape.jpg",
-      "assets/Wallpapers/alena-aenami-far-from-tomorrow.jpg",
-      "assets/Wallpapers/alena-aenami-horizon.png",
-      "assets/Wallpapers/alena-aenami-in-search-of-peace.png",
-      "assets/Wallpapers/alena-aenami-lights.jpg",
-      "assets/Wallpapers/alena-aenami-lost-in-between.jpg",
-      "assets/Wallpapers/alena-aenami-out-of-time.png",
-      "assets/Wallpapers/alena-aenami-sky-mirror.jpg",
-      "assets/Wallpapers/alena-aenami-stardust.jpg",
-      "assets/Wallpapers/alena-aenami-stars-and-you.png",
-      "assets/Wallpapers/alena-aenami-the-witcher.jpg",
-      "assets/Wallpapers/alena-aenami-timeless.jpg",
-      "assets/Wallpapers/alena-aenami-wait.jpg",
-      "assets/Wallpapers/alena-aenami-wings.jpg",
-      "assets/Wallpapers/alena-aenami-you.jpg",
-      "assets/Wallpapers/altos-odyssey-balloon-over-blue-mountains.jpg",
-      "assets/Wallpapers/altos-odyssey-blue-hills-balloon.jpg",
-      "assets/Wallpapers/altos-odyssey-chasm-jump.jpg",
-      "assets/Wallpapers/altos-odyssey-palm-kicker.jpg",
-      "assets/Wallpapers/altos-odyssey-purple-mountain-castle.jpg",
-      "assets/Wallpapers/alx-colorful-clouds.png",
-      "assets/Wallpapers/alx-sunset-over-palm-trees.png",
-      "assets/Wallpapers/among-trees-campsite.jpg",
-      "assets/Wallpapers/among-trees-dadaws-night-is-coming.jpg",
-      "assets/Wallpapers/among-trees-dadaws-small-cliffs.jpg",
-      "assets/Wallpapers/andrew-maleski-ghostly-gate.jpg",
-      "assets/Wallpapers/arcipello-scorched-earth.jpg",
-      "assets/Wallpapers/arcipello-what-once-was.jpg",
-      "assets/Wallpapers/arseniy-chebynkin-tokyo-street-night.jpg",
-      "assets/Wallpapers/artwithflo-empire-state-building.png",
-      "assets/Wallpapers/baajjii-vector-desert.jpg",
-      "assets/Wallpapers/bastien-grivet-the-guy-and-the-id-checking-bot.jpg",
-      "assets/Wallpapers/bisbiswas-a-summer-evening.png",
-      "assets/Wallpapers/bisbiswas-burning-clouds.png",
-      "assets/Wallpapers/bisbiswas-gathering.jpg",
-      "assets/Wallpapers/bisbiswas-lit-up-sky.jpg",
-      "assets/Wallpapers/bisbiswas-verdant-moonlight-no-people-edit.jpg",
-      "assets/Wallpapers/blackwolfshadow1-wolf-of-the-night.jpg",
-      "assets/Wallpapers/by-kvacm-gorod-zakat-liudi-siluty-budushchee.jpg",
-      "assets/Wallpapers/byrotek-calm-meadow.jpg",
-      "assets/Wallpapers/byrotek-mountain-view.png",
-      "assets/Wallpapers/byrotek-north-capital.png",
-      "assets/Wallpapers/byrotek-sundown-landscape.png",
-      "assets/Wallpapers/chilledcow-kupla-kingdom-in-blue.jpg",
-      "assets/Wallpapers/chrisostrowski-the-esteemed-palace-light.jpg",
-      "assets/Wallpapers/chrisostrowski-the-esteemed-palace.jpg",
-      "assets/Wallpapers/ciorano-the-sacred-creature.jpg",
-      "assets/Wallpapers/colormate-monogatari.jpg",
-      "assets/Wallpapers/craig-nacroix-mountains.jpg",
-      "assets/Wallpapers/dalle2-minimalistic-colorful-flat-mountain-landscape.png",
-      "assets/Wallpapers/dangiuz-leopoldo-d-angelo-westofthesun.png",
-      "assets/Wallpapers/daniel-ignacio-the-deer-spirit.jpg",
-      "assets/Wallpapers/darkkal44-come-with-me-surfaces.png",
-      "assets/Wallpapers/dataxiii-upscaled-vector-landscape.jpg",
-      "assets/Wallpapers/denis-istomin-chicco3.jpg",
-      "assets/Wallpapers/denis-istomin-listen-to-your-heart.jpg",
-      "assets/Wallpapers/denis-istomin-midnight-gazing.png",
-      "assets/Wallpapers/dpcdpc11-exodus.png",
-      "assets/Wallpapers/dpcdpc11-isolation.png",
-      "assets/Wallpapers/dpcdpc11-summer-on-the-lake.png",
-      "assets/Wallpapers/drawingsandstuff-lonely-tree.png",
-      "assets/Wallpapers/dropside-the-valley-ultrawide-gradient-landscape.png",
-      "assets/Wallpapers/edward11mk-deer-in-forest.jpg",
-      "assets/Wallpapers/edward11mk-tents-in-nature.jpg",
-      "assets/Wallpapers/Electronic_Sample_96-calm-night.png",
-      "assets/Wallpapers/ellysiumn-flaming-kingdom.jpg",
-      "assets/Wallpapers/era7-asian-spirit.jpg",
-      "assets/Wallpapers/era7-city-of-the-amethyst-nights.jpg",
-      "assets/Wallpapers/eric-elwell-tropical-environment.jpg",
-      "assets/Wallpapers/exitmothership-sunset-scene.jpg",
-      "assets/Wallpapers/f-tam-mountain-wilderness.png",
-      "assets/Wallpapers/faithhal-boat-and-mountains.jpg",
-      "assets/Wallpapers/farjana5240-bridge-forest.jpg",
-      "assets/Wallpapers/ferdinand-ladera-rice-terraces.jpg",
-      "assets/Wallpapers/forangeillustrations-ashenvale.png",
-      "assets/Wallpapers/frank-sun-twelve-suns.jpg",
-      "assets/Wallpapers/gamesdas-fantasy-collection-3.jpg",
-      "assets/Wallpapers/gavrl-snowy-forest.jpg",
-      "assets/Wallpapers/gavryl-broken-structures.jpg",
-      "assets/Wallpapers/gavryl-by-your-side.jpg",
-      "assets/Wallpapers/gavryl-cozy-night.jpg",
-      "assets/Wallpapers/gloomilygray-journey.jpg",
-      "assets/Wallpapers/gustavo-arteaga-ancient-tree-shrine.png",
-      "assets/Wallpapers/gustavo-arteaga-monolith-on-giants-causeway.jpg",
-      "assets/Wallpapers/gustavo-arteaga-reload.jpg",
-      "assets/Wallpapers/gustavo-arteaga-revenge.jpg",
-      "assets/Wallpapers/gydw1n-whisper-of-the-heart.jpg",
-      "assets/Wallpapers/haneron-landscape-mountain-home.jpg",
-      "assets/Wallpapers/hangmoon-alexander-komarov-white-blue-red-clouds.jpg",
-      "assets/Wallpapers/hangmoon-city.jpg",
-      "assets/Wallpapers/hangmoon-white-blue-red-clouds.jpg",
-      "assets/Wallpapers/higgsas-outrun.jpg",
-      "assets/Wallpapers/howard-chen-mao-mao-forest-campsite.jpg",
-      "assets/Wallpapers/hugobarretcastan-house-in-forest.jpg",
-      "assets/Wallpapers/icondesire-train-cross.png",
-      "assets/Wallpapers/incognit0ergosum-stable-diffusion-ultimate-city-autumn-meadow.jpg",
-      "assets/Wallpapers/itsmatt-japanese-painting-remade.jpg",
-      "assets/Wallpapers/itspatra-trailer-in-yosemite.png",
-      "assets/Wallpapers/jaynit-samurai-bridge.jpg",
-      "assets/Wallpapers/jay_v_jackson-between-the-twin-cities-recolored.jpg",
-      "assets/Wallpapers/jeff-ostberg-cozy-autumn-rain.jpg",
-      "assets/Wallpapers/joeyjazz-a-simple-scene.jpg",
-      "assets/Wallpapers/joeyjazz-antares.png",
-      "assets/Wallpapers/joeyjazz-behind-the-blister.jpg",
-      "assets/Wallpapers/joeyjazz-dreams-in-pastel.jpg",
-      "assets/Wallpapers/joeyjazz-just-a-tree-and-a-breeze.jpg",
-      "assets/Wallpapers/joeyjazz-place-out-of-place.png",
-      "assets/Wallpapers/joeyjazz-sp-fields-of-bronze.jpg",
-      "assets/Wallpapers/joeyjazz-sp-highrise.jpg",
-      "assets/Wallpapers/joeyjazz-timeless.jpg",
-      "assets/Wallpapers/joeyjazz-under-the-strange-horizon.jpg",
-      "assets/Wallpapers/joeyjazz-water-air-and-some-magic.jpg",
-      "assets/Wallpapers/joeyjazz-where-day-and-night-meet.jpg",
-      "assets/Wallpapers/jonadinges-getaway.png",
-      "assets/Wallpapers/josef-barton-the-last-one.jpg",
-      "assets/Wallpapers/josegoncalo-beasts.jpg",
-      "assets/Wallpapers/junhyuk-lim-acoolrocket-tree-of-life-edit.png",
-      "assets/Wallpapers/jurrig-hutan-owl-forest-night.jpg",
-      "assets/Wallpapers/kak8gm-louis-coyle-inspired-lakeside-aurora.jpg",
-      "assets/Wallpapers/kevin-gnutzmans-singularity.jpg",
-      "assets/Wallpapers/kuldarleement-stellar-collision.jpg",
-      "assets/Wallpapers/kvacm-africa-feeling.png",
-      "assets/Wallpapers/kvacm-amythest-kingdom.jpg",
-      "assets/Wallpapers/kvacm-early-evening.jpg",
-      "assets/Wallpapers/kvacm-falling-sun.png",
-      "assets/Wallpapers/kvacm-magenta-bay.png",
-      "assets/Wallpapers/kvacm-misty-mountains.jpg",
-      "assets/Wallpapers/kvacm-night-patrol.jpg",
-      "assets/Wallpapers/kvacm-pinky-purple.jpg",
-      "assets/Wallpapers/kvacm-synth-waterfall.png",
-      "assets/Wallpapers/kvacm-synthwave-view.jpg",
-      "assets/Wallpapers/kvacm-torii-city.jpg",
-      "assets/Wallpapers/lee_zudarts-study.jpg",
-      "assets/Wallpapers/lofi-coffee.jpg",
-      "assets/Wallpapers/louis-coyle-inspired-lakeside.png",
-      "assets/Wallpapers/louis-coyle-sunrise.jpg",
-      "assets/Wallpapers/mark-kirkpatrick-mk-landscape-05.jpg",
-      "assets/Wallpapers/masterteacher-red-sky-background.jpg",
-      "assets/Wallpapers/matt-carlson-spring-mountain.png",
-      "assets/Wallpapers/michal-lisowski-entergalactic.png",
-      "assets/Wallpapers/mitchrandom-alpine-sunset.png",
-      "assets/Wallpapers/mklgustafsson-among-trees-deer.jpg",
-      "assets/Wallpapers/mklgustafsson-among-trees-forest.png",
-      "assets/Wallpapers/mklgustafsson-among-trees-fox.jpg",
-      "assets/Wallpapers/mklgustafsson-among-trees-river-side.jpg",
-      "assets/Wallpapers/mklgustafsson-small-memory.png",
-      "assets/Wallpapers/mklgustafsson-the-girl-and-the-bear.png",
-      "assets/Wallpapers/moewanders-summers-end.jpg",
-      "assets/Wallpapers/moewanders-the-frontier.jpg",
-      "assets/Wallpapers/mofghfgfgh-moon-mountain.png",
-      "assets/Wallpapers/mofghfgfgh-ocean-sunset.png",
-      "assets/Wallpapers/mrwhoseboss-dalle2-edit-alone-but-awesome.jpg",
-      "assets/Wallpapers/muhammad-nafay-deer-and-the-fireflies.jpg",
-      "assets/Wallpapers/muhammad-nafay-the-new-light.jpg",
-      "assets/Wallpapers/muhammad_nafay-couple-cityscape.png",
-      "assets/Wallpapers/muriLLu-Anime-Scenery-Sunset.jpg",
-      "assets/Wallpapers/muriLLu-Japan-Neo-Wallpaper.png",
-      "assets/Wallpapers/ncoll36-forest-mountain.jpg",
-      "assets/Wallpapers/neonoverdrive-pastel_sunset_by.png",
-      "assets/Wallpapers/neonoverdrive-vaporwave-off-kanagawa.jpg",
-      "assets/Wallpapers/neonoverdrive-vast-neon-cityscape.jpg",
-      "assets/Wallpapers/normieboy96-cherry-blossom.jpg",
-      "assets/Wallpapers/ogarart-bitter-coast.jpg",
-      "assets/Wallpapers/ogarart-blue-lighthouse-2019-01-13.jpg",
-      "assets/Wallpapers/ogarart-bridge.jpg",
-      "assets/Wallpapers/ogarart-cactus-2019-01-20.jpg",
-      "assets/Wallpapers/OGARart-eagle-mountain-sunset-minimalist.jpg",
-      "assets/Wallpapers/ogarart-forest-mountains-2019-01-17.jpg",
-      "assets/Wallpapers/ogarart-forest-sunset-2019-01-25.png",
-      "assets/Wallpapers/ogarart-forest-trees.jpg",
-      "assets/Wallpapers/ogarart-fortress.jpg",
-      "assets/Wallpapers/ogarart-frozen.jpg",
-      "assets/Wallpapers/ogarart-lone-wanderer.jpg",
-      "assets/Wallpapers/ogarart-mountains-ice.jpg",
-      "assets/Wallpapers/ogarart-orange-sky-red-rocks-2019-03-04.jpg",
-      "assets/Wallpapers/ogarart-purple-mountains-2019-01-29.jpg",
-      "assets/Wallpapers/ogarart-purple-trees-2019-02-11.jpg",
-      "assets/Wallpapers/ogarart-purple-trees-and-deer-2019-01-15.jpg",
-      "assets/Wallpapers/ogarart-purple-trees-under-stars-2019-01-27.jpg",
-      "assets/Wallpapers/ogarart-red-cave.jpg",
-      "assets/Wallpapers/ogarart-red-mountains-lake-2019-10-06.jpg",
-      "assets/Wallpapers/ogarart-red-mountains.jpg",
-      "assets/Wallpapers/ogarart-savannah.jpg",
-      "assets/Wallpapers/ogarart-sunset-2.jpg",
-      "assets/Wallpapers/ogarart-wolf-and-blue-trees-2019-01-22.jpg",
-      "assets/Wallpapers/olly-moss-boris001-firewatch.jpg",
-      "assets/Wallpapers/olly-moss-dadaws-firewatch-bright-moon.jpg",
-      "assets/Wallpapers/olly-moss-dadaws-firewatch-cliff.jpg",
-      "assets/Wallpapers/olly-moss-firewatch-blue-forest.png",
-      "assets/Wallpapers/olly-moss-firewatch-green.png",
-      "assets/Wallpapers/olly-moss-firewatch-night.jpg",
-      "assets/Wallpapers/olly-moss-firewatch-purple.jpg",
-      "assets/Wallpapers/olly-moss-firewatch-red.jpg",
-      "assets/Wallpapers/olly-moss-firewatch-river.png",
-      "assets/Wallpapers/olly-moss-firewatch-stag.jpg",
-      "assets/Wallpapers/olly-moss-firewatch-yellow.jpg",
-      "assets/Wallpapers/olly-moss-sunset-mountains-firewatch.jpg",
-      "assets/Wallpapers/P82En-cherry-blossom-mountain-range.jpg",
-      "assets/Wallpapers/paralloid-reaching-the-stars-over-mountain.jpg",
-      "assets/Wallpapers/partenoxenese-blue-faro.jpg",
-      "assets/Wallpapers/phantomghostx-mountains.jpg",
-      "assets/Wallpapers/quentinmarsollier-unexplored.png",
-      "assets/Wallpapers/raven2cz-sunset-river-among-trees.png",
-      "assets/Wallpapers/redditislikefb-astral-summit.png",
-      "assets/Wallpapers/refiend-carmine-rock.jpg",
-      "assets/Wallpapers/rhads-survivors.png",
-      "assets/Wallpapers/richarddorran-city-of-life.jpg",
-      "assets/Wallpapers/ricodz-lost.jpg",
-      "assets/Wallpapers/rmradev-alien-moon.jpg",
-      "assets/Wallpapers/rmradev-colorful-landscape.png",
-      "assets/Wallpapers/rmradev-colorful-mountains.jpg",
-      "assets/Wallpapers/rmradev-evening-forest.png",
-      "assets/Wallpapers/rmradev-moon-sunset-landscape.png",
-      "assets/Wallpapers/rmradev-mountain-retreat.jpg",
-      "assets/Wallpapers/rmradev-mountains.jpg",
-      "assets/Wallpapers/rmradev-peaceful-lake.png",
-      "assets/Wallpapers/rmradev-sunset-landscape.jpg",
-      "assets/Wallpapers/rmradev-tranquility.png",
-      "assets/Wallpapers/rmradev-vampire-castle.jpg",
-      "assets/Wallpapers/roboturtle_-purple-sky.jpg",
-      "assets/Wallpapers/romain-trystram-Neon-Alleyway.jpg",
-      "assets/Wallpapers/romen-deva-awakening.jpg",
-      "assets/Wallpapers/rook-rip-mt-fuji.png",
-      "assets/Wallpapers/ryky-sky-wave.png",
-      "assets/Wallpapers/ryky-the-rest.png",
-      "assets/Wallpapers/sabbathbl00dysabbath-desert-synthwave-ai-landscape.png",
-      "assets/Wallpapers/saisho-moonlit-night-wedding.jpg",
-      "assets/Wallpapers/salman-illustrator-japanese-landscape.png",
-      "assets/Wallpapers/samantha-lee-purple-deer.png",
-      "assets/Wallpapers/sandace11-dusk.jpg",
-      "assets/Wallpapers/significancefit6753-samurai-evening-jonah-edit.jpg",
-      "assets/Wallpapers/skavrx-mountain.png",
-      "assets/Wallpapers/stable-diffusion-wavymulder-cyberpunk-sunset.png",
-      "assets/Wallpapers/strigonian-far-north.png",
-      "assets/Wallpapers/surendra-rajawat-butterflies.png",
-      "assets/Wallpapers/surendra-rajawat-island-in-the-sky.jpg",
-      "assets/Wallpapers/surendra-rajawat-natures-beauty.png",
-      "assets/Wallpapers/surendra-rajawat-the-magic-unfolds.png",
-      "assets/Wallpapers/tacosauceninja-blossoms.jpg",
-      "assets/Wallpapers/tacosauceninja-i-cant-stop-what-you-began.png",
-      "assets/Wallpapers/tacosauceninja-remembering.jpg",
-      "assets/Wallpapers/tacosauceninja-rooftop.jpg",
-      "assets/Wallpapers/tacosauceninja-shadows-die-twice.png",
-      "assets/Wallpapers/tanvdesign-fantasy-landscape.png",
-      "assets/Wallpapers/tanvdesign-wolf.jpg",
-      "assets/Wallpapers/the-gate-to-serenity-danisogen.png",
-      "assets/Wallpapers/thedigitalrob-separated-by-fate.jpg",
-      "assets/Wallpapers/thomasshifflett31-beautiful-city-sunset.jpg",
-      "assets/Wallpapers/tienphat-night-landscape.jpg",
-      "assets/Wallpapers/tongxinfen-extraterrestrial.jpg",
-      "assets/Wallpapers/totalcoconut-midjourney-landscape-wallpaper.jpg",
-      "assets/Wallpapers/tyler-smith-blue-lagoon-port.jpg",
-      "assets/Wallpapers/tyler-smith-redwoods-wolf.jpg",
-      "assets/Wallpapers/uagami-cherry-blossoms.jpg",
-      "assets/Wallpapers/unknown-anime-sunset.jpg",
-      "assets/Wallpapers/unknown-bird-landing-on-water.jpg",
-      "assets/Wallpapers/unknown-blue-moon-planets-over-lake-trees.jpg",
-      "assets/Wallpapers/unknown-couple-on-red-mountains.jpg",
-      "assets/Wallpapers/unknown-cyberpunk-city.jpg",
-      "assets/Wallpapers/unknown-dark-mojave-desert.jpg",
-      "assets/Wallpapers/unknown-deer-in-the-light.jpg",
-      "assets/Wallpapers/unknown-downtown-minneapolis.jpg",
-      "assets/Wallpapers/unknown-elephants-green-mountain.jpg",
-      "assets/Wallpapers/unknown-green-mountains-and-hills.jpg",
-      "assets/Wallpapers/unknown-ice-mountain-trees.png",
-      "assets/Wallpapers/unknown-minimalist-desert-landscape.jpg",
-      "assets/Wallpapers/unknown-mountain-birds.png",
-      "assets/Wallpapers/unknown-multicolor-rocket-launch.jpg",
-      "assets/Wallpapers/unknown-orange-sunset-over-blue-hills.jpg",
-      "assets/Wallpapers/unknown-pink-mountains.png",
-      "assets/Wallpapers/unknown-pink-rocky-cliffs-and-water.jpg",
-      "assets/Wallpapers/unknown-pink-sunset-mountain-trees.png",
-      "assets/Wallpapers/unknown-purple-lake.jpg",
-      "assets/Wallpapers/unknown-purple-mountain-landscape-with-ship.jpg",
-      "assets/Wallpapers/unknown-samurai-forest.jpg",
-      "assets/Wallpapers/unknown-snowy-landscape.jpg",
-      "assets/Wallpapers/unknown-sunset-behind-island-palm-trees.jpg",
-      "assets/Wallpapers/unknown-sunset-fishing.jpg",
-      "assets/Wallpapers/unknown-whale-tail-at-sunset.jpg",
-      "assets/Wallpapers/unkown-purple-mountains.png",
-      "assets/Wallpapers/unreal-midjourney-a-stunning-sunset.jpg",
-      "assets/Wallpapers/vorgbardo-ancient-oriental-temple.jpg",
-      "assets/Wallpapers/VorgBardo-midjourney-1960s-sci-fi-planet.jpg",
-      "assets/Wallpapers/voyager-bequem-almost-spring-prev-2.jpg",
-      "assets/Wallpapers/voyager-board-man-moonlit-nights-f.jpg",
-      "assets/Wallpapers/voyager-camino-de-kazul-arte.jpg",
-      "assets/Wallpapers/voyager-cloud-break-day-drifting.png",
-      "assets/Wallpapers/voyager-coldbrew-backyard-gardens.jpg",
-      "assets/Wallpapers/voyager-cosmonkey-leaves.jpg",
-      "assets/Wallpapers/voyager-lofi-exposure.jpg",
-      "assets/Wallpapers/voyager-nogymx-marauders.jpg",
-      "assets/Wallpapers/voyager-otaam-tonion-lush-space.jpg",
-      "assets/Wallpapers/voyager-quilla-teaser-traders.jpg",
-      "assets/Wallpapers/voyager-sai-t-inownlove-overseas.jpg",
-      "assets/Wallpapers/voyager-samurai-bebop-acoolrocket-edit.png",
-      "assets/Wallpapers/voyager-simber-tibeauthetraveler-eternal-sunshine.jpg",
-      "assets/Wallpapers/wallpapersden-purple-artistic-landscape.png",
-      "assets/Wallpapers/wallpapersden.com_cool-red-mountains-4k.jpg",
-      "assets/Wallpapers/wallpapersden.com_landscape-moon-digital-evening.jpg",
-      "assets/Wallpapers/wallpapersden.com_minimal-reflection-sunset.jpg",
-      "assets/Wallpapers/wallpapersden.com_nature-sunset-simple-minimal-illustration.jpg",
-      "assets/Wallpapers/wallpapersden.com_pyramid-minimal-landscape.jpg",
-      "assets/Wallpapers/wheazzy-birds-mountain.jpg",
-      "assets/Wallpapers/wheazzy-blue-mountains.jpg",
-      "assets/Wallpapers/wp5102649-neon-retro-city-ps4-wallpapers.png",
-      "assets/Wallpapers/wp5998347-retro-4k-wallpapers.jpg",
-      "assets/Wallpapers/wp6504516-monument-valley-sunset-ultra-hd-wallpapers.jpg",
-      "assets/Wallpapers/yefedlger-eolyn.jpg",
-      "assets/Wallpapers/zakoriart-commission-piece-for-game.jpg",
-      "assets/Wallpapers/zakoriart-flow.jpg",
-      "assets/Wallpapers/zakoriart-if-silence-could-be-heard.jpg",
-      "assets/Wallpapers/zeoluwang-journey.jpg"
-    ];
-
-    let currentWallpaperIndex = -1;
-
-    function applyRandomWallpaper() {
-      if (!wallpapers || wallpapers.length === 0) return;
-      let newIndex;
-      do {
-        newIndex = Math.floor(Math.random() * wallpapers.length);
-      } while (newIndex === currentWallpaperIndex && wallpapers.length > 1);
-
-      currentWallpaperIndex = newIndex;
-      const randomBg = wallpapers[currentWallpaperIndex];
-      document.body.style.backgroundImage = `url('${encodeURI(randomBg)}')`;
-    }
-
-    const quotes = [
-      "Teaching is the one profession that creates all other professions.",
-      "To teach is to touch a life forever.",
-      "A great teacher ignites the imagination and instills a love of learning.",
-      "Teaching is the art of assisting discovery.",
-      "Teachers plant seeds that grow forever.",
-      "The influence of a good teacher can never be erased.",
-      "Good teaching is more a giving of right questions than a giving of right answers.",
-      "It takes a big heart to help shape little minds.",
-      "Education is not the filling of a pail, but the lighting of a fire.",
-      "A teacher takes a hand, opens a mind, and touches a heart.",
-      "Your patience today builds a student's confidence tomorrow.",
-      "Teaching is a work of heart.",
-      "Every child deserves a champion who will never give up on them.",
-      "The best teachers teach from the heart, not from the book.",
-      "What the teacher is, is more important than what he teaches.",
-      "Behind every successful student is a teacher who believed in them.",
-      "One child, one teacher, one book, and one pen can change the world.",
-      "To world you may be just a teacher, but to your students you are a hero.",
-      "Patience, persistence, and passion make an extraordinary teacher.",
-      "Teaching is the highest form of understanding."
-    ];
-
-    const songList = [
-      { title: "Alphabet Jazz", src: "assets/Music/Junior/Alphabet Jazz.mp3" },
-      { title: "Arcade Fun", src: "assets/Music/Junior/Arcade Fun.mp3" },
-      { title: "Baby Fun", src: "assets/Music/Junior/Baby Fun.mp3" },
-      { title: "Bombin", src: "assets/Music/Junior/Bombin.mp3" },
-      { title: "Cartoon Cartoons Animation", src: "assets/Music/Junior/Cartoon Cartoons Animation.mp3" },
-      { title: "Cartoon Kids Adventure Music Happy Little Trails", src: "assets/Music/Junior/Cartoon Kids Adventure Music Happy Little Trails.mp3" },
-      { title: "Cheerful Acoustic Melody", src: "assets/Music/Junior/Cheerful Acoustic Melody.mp3" },
-      { title: "Cheerful Cheerful Music", src: "assets/Music/Junior/Cheerful Cheerful Music.mp3" },
-      { title: "Cheerful Cinematic Song", src: "assets/Music/Junior/Cheerful Cinematic Song.mp3" },
-      { title: "Cheerful Comedy Funny Quirky Background", src: "assets/Music/Junior/Cheerful Comedy Funny Quirky Background.mp3" },
-      { title: "Cheerful Happy Cooking Food Music", src: "assets/Music/Junior/Cheerful Happy Cooking Food Music.mp3" },
-      { title: "Cheerful Happy", src: "assets/Music/Junior/Cheerful Happy.mp3" },
-      { title: "Cheerful Instrumental", src: "assets/Music/Junior/Cheerful Instrumental.mp3" },
-      { title: "Cheerful Joyful Playful Music 1", src: "assets/Music/Junior/Cheerful Joyful Playful Music 1.mp3" },
-      { title: "Cheerful Joyful Playful Music 2", src: "assets/Music/Junior/Cheerful Joyful Playful Music 2.mp3" },
-      { title: "Cheerful Joyful Playful Music 3", src: "assets/Music/Junior/Cheerful Joyful Playful Music 3.mp3" },
-      { title: "Cheerful Joyful Playful Music 4", src: "assets/Music/Junior/Cheerful Joyful Playful Music 4.mp3" },
-      { title: "Cheerful Joyful Playful Music 5", src: "assets/Music/Junior/Cheerful Joyful Playful Music 5.mp3" },
-      { title: "Cheerful Joyful Tiktok Music 1", src: "assets/Music/Junior/Cheerful Joyful Tiktok Music 1.mp3" },
-      { title: "Cheerful Joyful Tiktok Music 2", src: "assets/Music/Junior/Cheerful Joyful Tiktok Music 2.mp3" },
-      { title: "Cheerful Joyful Tiktok Music 3", src: "assets/Music/Junior/Cheerful Joyful Tiktok Music 3.mp3" },
-      { title: "Cheerful Mood", src: "assets/Music/Junior/Cheerful Mood.mp3" },
-      { title: "Cheerful Playful Joyful Music (1)", src: "assets/Music/Junior/Cheerful Playful Joyful Music (1).mp3" },
-      { title: "Cheerful Playful Joyful Music", src: "assets/Music/Junior/Cheerful Playful Joyful Music.mp3" },
-      { title: "Cheerful Playtime Adventure (1)", src: "assets/Music/Junior/Cheerful Playtime Adventure (1).mp3" },
-      { title: "Cheerful Playtime Adventure", src: "assets/Music/Junior/Cheerful Playtime Adventure.mp3" },
-      { title: "Cheerful Whistle", src: "assets/Music/Junior/Cheerful Whistle.mp3" },
-      { title: "Cheerful", src: "assets/Music/Junior/Cheerful.mp3" },
-      { title: "Christmas Holiday Background", src: "assets/Music/Junior/Christmas Holiday Background.mp3" },
-      { title: "Christmas", src: "assets/Music/Junior/Christmas.mp3" },
-      { title: "Cute Cheerful Whistle Cute Music", src: "assets/Music/Junior/Cute Cheerful Whistle Cute Music.mp3" },
-      { title: "Cute Cheerful Whistle Music", src: "assets/Music/Junior/Cute Cheerful Whistle Music.mp3" },
-      { title: "Cute Comedy", src: "assets/Music/Junior/Cute Comedy.mp3" },
-      { title: "Cute Cute Music 1", src: "assets/Music/Junior/Cute Cute Music 1.mp3" },
-      { title: "Cute Cute Music 2", src: "assets/Music/Junior/Cute Cute Music 2.mp3" },
-      { title: "Cute Cute Music 3", src: "assets/Music/Junior/Cute Cute Music 3.mp3" },
-      { title: "Cute Happy Kids 1", src: "assets/Music/Junior/Cute Happy Kids 1.mp3" },
-      { title: "Cute Happy Kids 2", src: "assets/Music/Junior/Cute Happy Kids 2.mp3" },
-      { title: "Cute Kids Lofi", src: "assets/Music/Junior/Cute Kids Lofi.mp3" },
-      { title: "Cute Pets Animals Music 1", src: "assets/Music/Junior/Cute Pets Animals Music 1.mp3" },
-      { title: "Cute Pets Animals Music 2", src: "assets/Music/Junior/Cute Pets Animals Music 2.mp3" },
-      { title: "Cute Whistle Cheerful Cute Music", src: "assets/Music/Junior/Cute Whistle Cheerful Cute Music.mp3" },
-      { title: "Cute Whistle Cheerful Music", src: "assets/Music/Junior/Cute Whistle Cheerful Music.mp3" },
-      { title: "Festive Christmas Background", src: "assets/Music/Junior/Festive Christmas Background.mp3" },
-      { title: "Fun 1", src: "assets/Music/Junior/Fun 1.mp3" },
-      { title: "Fun 2", src: "assets/Music/Junior/Fun 2.mp3" },
-      { title: "Fun Cooking", src: "assets/Music/Junior/Fun Cooking.mp3" },
-      { title: "Fun Fun Fun Fun Fun", src: "assets/Music/Junior/Fun Fun Fun Fun Fun.mp3" },
-      { title: "Fun Fun Happy Music", src: "assets/Music/Junior/Fun Fun Happy Music.mp3" },
-      { title: "Fun Fun Music 1", src: "assets/Music/Junior/Fun Fun Music 1.mp3" },
-      { title: "Fun Fun Music 2", src: "assets/Music/Junior/Fun Fun Music 2.mp3" },
-      { title: "Fun Fun Music 3", src: "assets/Music/Junior/Fun Fun Music 3.mp3" },
-      { title: "Fun Happy Ukulele", src: "assets/Music/Junior/Fun Happy Ukulele.mp3" },
-      { title: "Fun Kids", src: "assets/Music/Junior/Fun Kids.mp3" },
-      { title: "Fun Life", src: "assets/Music/Junior/Fun Life.mp3" },
-      { title: "Fun Morning", src: "assets/Music/Junior/Fun Morning.mp3" },
-      { title: "Fun Upbeat Background Music", src: "assets/Music/Junior/Fun Upbeat Background Music.mp3" },
-      { title: "Fun Vibe", src: "assets/Music/Junior/Fun Vibe.mp3" },
-      { title: "Happy Adventure Quest", src: "assets/Music/Junior/Happy Adventure Quest.mp3" },
-      { title: "Happy Cute Kids", src: "assets/Music/Junior/Happy Cute Kids.mp3" },
-      { title: "Happy Happy Background", src: "assets/Music/Junior/Happy Happy Background.mp3" },
-      { title: "Happy Happy Kids Music", src: "assets/Music/Junior/Happy Happy Kids Music.mp3" },
-      { title: "Happy Happy Music 1", src: "assets/Music/Junior/Happy Happy Music 1.mp3" },
-      { title: "Happy Happy Music 2", src: "assets/Music/Junior/Happy Happy Music 2.mp3" },
-      { title: "Happy Kids Background Music", src: "assets/Music/Junior/Happy Kids Background Music.mp3" },
-      { title: "Happy Piano Cheerful Music", src: "assets/Music/Junior/Happy Piano Cheerful Music.mp3" },
-      { title: "Happy Ukulele Version 1", src: "assets/Music/Junior/Happy Ukulele Version 1.mp3" },
-      { title: "Happy Vibes", src: "assets/Music/Junior/Happy Vibes.mp3" },
-      { title: "Into The Adventure", src: "assets/Music/Junior/Into The Adventure.mp3" },
-      { title: "Joyful Cheerful Playful Music 1", src: "assets/Music/Junior/Joyful Cheerful Playful Music 1.mp3" },
-      { title: "Joyful Cheerful Playful Music 2", src: "assets/Music/Junior/Joyful Cheerful Playful Music 2.mp3" },
-      { title: "Joyful Cheerful Tiktok Music 1", src: "assets/Music/Junior/Joyful Cheerful Tiktok Music 1.mp3" },
-      { title: "Joyful Cheerful Tiktok Music 2", src: "assets/Music/Junior/Joyful Cheerful Tiktok Music 2.mp3" },
-      { title: "Kids Adventure 1", src: "assets/Music/Junior/Kids Adventure 1.mp3" },
-      { title: "Kids Adventure 2", src: "assets/Music/Junior/Kids Adventure 2.mp3" },
-      { title: "Kids Background Music (1)", src: "assets/Music/Junior/Kids Background Music (1).mp3" },
-      { title: "Kids Background Music", src: "assets/Music/Junior/Kids Background Music.mp3" },
-      { title: "Kids Kids Music", src: "assets/Music/Junior/Kids Kids Music.mp3" },
-      { title: "Kids Playground Giggles Parade", src: "assets/Music/Junior/Kids Playground Giggles Parade.mp3" },
-      { title: "Kids Quirky Playful Children Music", src: "assets/Music/Junior/Kids Quirky Playful Children Music.mp3" },
-      { title: "Kids", src: "assets/Music/Junior/Kids.mp3" },
-      { title: "Mary Had A Little Lamb", src: "assets/Music/Junior/Mary Had A Little Lamb.mp3" },
-      { title: "New Adventure", src: "assets/Music/Junior/New Adventure.mp3" },
-      { title: "Old MacDonald", src: "assets/Music/Junior/Old MacDonald.mp3" },
-      { title: "Playful Cheerful Joyful Music", src: "assets/Music/Junior/Playful Cheerful Joyful Music.mp3" },
-      { title: "Playful Joyful Cheerful Music 1", src: "assets/Music/Junior/Playful Joyful Cheerful Music 1.mp3" },
-      { title: "Playful Joyful Cheerful Music 2", src: "assets/Music/Junior/Playful Joyful Cheerful Music 2.mp3" },
-      { title: "Playful Joyful Cheerful Music 3", src: "assets/Music/Junior/Playful Joyful Cheerful Music 3.mp3" },
-      { title: "Playful Joyful Cheerful Music 4", src: "assets/Music/Junior/Playful Joyful Cheerful Music 4.mp3" },
-      { title: "Playful Joyful Cheerful Music 5", src: "assets/Music/Junior/Playful Joyful Cheerful Music 5.mp3" },
-      { title: "Playful Playful Cheerful Joyful Music", src: "assets/Music/Junior/Playful Playful Cheerful Joyful Music.mp3" },
-      { title: "Playful Playful Joyful Cheerful Music", src: "assets/Music/Junior/Playful Playful Joyful Cheerful Music.mp3" },
-      { title: "Short Ukulele Jingle Cheerful Happy and Bright", src: "assets/Music/Junior/Short Ukulele Jingle Cheerful Happy and Bright.mp3" },
-      { title: "Tiktok Cheerful Joyful Music", src: "assets/Music/Junior/Tiktok Cheerful Joyful Music.mp3" },
-      { title: "Tiktok Joyful Cheerful Music 1", src: "assets/Music/Junior/Tiktok Joyful Cheerful Music 1.mp3" },
-      { title: "Tiktok Joyful Cheerful Music 2", src: "assets/Music/Junior/Tiktok Joyful Cheerful Music 2.mp3" },
-      { title: "Toddler Kids Background Music", src: "assets/Music/Junior/Toddler Kids Background Music.mp3" },
-      { title: "Turning Pages", src: "assets/Music/Junior/Turning Pages.mp3" },
-      { title: "Twinkle Twinkle Little Star", src: "assets/Music/Junior/Twinkle Twinkle Little Star.mp3" },
-      { title: "Ukulele Cute Joyful Music", src: "assets/Music/Junior/Ukulele Cute Joyful Music.mp3" },
-      { title: "Ukulele Cute Joyful Ukulele Music", src: "assets/Music/Junior/Ukulele Cute Joyful Ukulele Music.mp3" },
-      { title: "Ukulele Ukulele Joyful Cute Music", src: "assets/Music/Junior/Ukulele Ukulele Joyful Cute Music.mp3" },
-      { title: "Ukulele", src: "assets/Music/Junior/Ukulele.mp3" },
-      { title: "Upbeat Upbeat Music", src: "assets/Music/Junior/Upbeat Upbeat Music.mp3" },
-      { title: "Upbeat", src: "assets/Music/Junior/Upbeat.mp3" },
-      { title: "We Wish You A Merry Christmas", src: "assets/Music/Junior/We Wish You A Merry Christmas.mp3" },
-      { title: "Whimsical Adventure", src: "assets/Music/Junior/Whimsical Adventure.mp3" },
-      { title: "Whistle Cheerful Cute Music 1", src: "assets/Music/Junior/Whistle Cheerful Cute Music 1.mp3" },
-      { title: "Whistle Cheerful Cute Music 2", src: "assets/Music/Junior/Whistle Cheerful Cute Music 2.mp3" },
-      { title: "Whistle Cute Cheerful Music", src: "assets/Music/Junior/Whistle Cute Cheerful Music.mp3" }
-    ];
-
-    window.onload = function() {
-      applyRandomWallpaper();
-
-      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', options);
-
-      const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-      document.getElementById('daily-quote').textContent = `"${randomQuote}"`;
-
-      initMusicPlayer();
-    };
-
-    function showTOC() {
-      applyRandomWallpaper();
-
-      const overlay = document.getElementById('bg-overlay');
-      overlay.style.backdropFilter = 'blur(2px)';
-      overlay.style.webkitBackdropFilter = 'blur(2px)';
-
-      document.getElementById('landing-screen').style.display = 'none';
-      document.getElementById('toc-screen').style.display = 'flex';
-      document.getElementById('top-nav').style.display = 'none';
-      document.getElementById('musicContainer').style.display = 'none';
-      document.getElementById('durationContainer').style.display = 'none';
-      document.getElementById('slideDrawerContainer').style.display = 'none';
-    }
-
-    function selectAudience(type) {
-      activeAudience = type;
-      document.getElementById('toc-screen').style.display = 'none';
-      if (type === 'Junior') {
-        document.getElementById('junior-screen').style.display = 'flex';
-      } else if (type === 'Adult') {
-        document.getElementById('adult-screen').style.display = 'flex';
-      }
-
-      document.getElementById('top-nav').style.display = 'flex';
-      document.getElementById('musicContainer').style.display = 'none';
-      document.getElementById('durationContainer').style.display = 'none';
-      document.getElementById('slideDrawerContainer').style.display = 'none';
-    }
-
-    function selectLevel(audience, level) {
-      activeAudience = audience;
-      activeLevel = level;
-
-      document.getElementById('junior-screen').style.display = 'none';
-      document.getElementById('adult-screen').style.display = 'none';
-
-      document.getElementById('sp-header-title').textContent = `${audience} - ${level}`;
-      document.getElementById('sp-screen').style.display = 'flex';
-      document.getElementById('musicContainer').style.display = 'none';
-      document.getElementById('durationContainer').style.display = 'none';
-      document.getElementById('slideDrawerContainer').style.display = 'none';
-
-      renderSPCards();
-    }
-
-    /* Renders folder list based on selected audience and level */
-    function renderSPCards() {
-      const container = document.getElementById('sp-card-container');
-      container.innerHTML = '';
-
-      let modulesToDisplay = defaultSPFolders;
-
-      if (activeAudience === 'Junior') {
-        if (activeLevel === 'Beginner') {
-          modulesToDisplay = beginnerFolders;
-        } else if (activeLevel === 'Intermediate') {
-          modulesToDisplay = juniorIntermediateFolders;
-        } else if (activeLevel === 'Advanced') {
-          modulesToDisplay = juniorAdvancedFolders;
-        }
-      } else if (activeAudience === 'Adult') {
-        if (activeLevel === 'Beginner') {
-          modulesToDisplay = adultBeginnerFolders;
-        } else if (activeLevel === 'Intermediate') {
-          modulesToDisplay = defaultSPFolders;
-        } else if (activeLevel === 'Advanced') {
-          modulesToDisplay = defaultSPFolders;
-        }
-      }
-
-      modulesToDisplay.forEach(sp => {
-        const card = document.createElement('div');
-        card.className = 'comic-card sp-card';
-        card.onclick = () => openSP(sp);
-        card.innerHTML = `<div class="sp-text">${sp}</div>`;
-        container.appendChild(card);
+    // Helper to check if an image URL exists
+    function checkImageExists(url) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+        img.src = url;
       });
     }
 
-    function openSP(spName) {
-      activeSP = spName;
-      document.getElementById('sp-screen').style.display = 'none';
-      document.getElementById('viewer-screen').style.display = 'flex';
-
-      const topNav = document.getElementById('top-nav');
-      topNav.style.display = 'flex';
-      topNav.classList.add('presentation-mode');
-
-      document.getElementById('musicContainer').style.display = 'block';
-      document.getElementById('durationContainer').style.display = 'block';
-      document.getElementById('slideDrawerContainer').style.display = 'block';
-
-      stopSlideshow();
-      isShuffled = false;
-      updateShuffleBtnUI();
-
-      countAndLoadSlides();
-    }
-
-    function countAndLoadSlides() {
-      const CLOUDFLARE_BASE_URL = "https://emc-welcome.pages.dev/";
-      let detectedSlides = [];
-      let checkIndex = 1;
-      workingTemplate = null;
-
-      function findWorkingPath(num, callback) {
-        if (workingTemplate) {
-          const path = workingTemplate(num);
-          const testImg = new Image();
-          testImg.onload = () => callback(path);
-          testImg.onerror = () => callback(null);
-          testImg.src = path;
-          return;
-        }
-
-        const candidatePaths = [
-          `${CLOUDFLARE_BASE_URL}Level/${activeAudience}/${activeLevel}/${activeSP}/Slide${num}.PNG`,
-          `${CLOUDFLARE_BASE_URL}Level/${activeAudience}/${activeLevel}/${activeSP}/Slide${num}.png`,
-          `${CLOUDFLARE_BASE_URL}Level/${activeLevel}/${activeSP}/Slide${num}.PNG`,
-          `${CLOUDFLARE_BASE_URL}Level/${activeLevel}/${activeSP}/Slide${num}.png`,
-          `${CLOUDFLARE_BASE_URL}Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide${num}.PNG`,
-          `${CLOUDFLARE_BASE_URL}Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide${num}.png`,
-          `${CLOUDFLARE_BASE_URL}Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide ${num}.PNG`,
-          `${CLOUDFLARE_BASE_URL}Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide ${num}.png`,
-          `${CLOUDFLARE_BASE_URL}Level/${activeAudience}/${activeLevel}/${activeSP}/Slide ${num}.PNG`,
-          `${CLOUDFLARE_BASE_URL}Level/${activeAudience}/${activeLevel}/${activeSP}/Slide ${num}.png`
-        ];
-        let idx = 0;
-        function testNext() {
-          if (idx >= candidatePaths.length) {
-            callback(null);
-            return;
-          }
-          const candidatePath = candidatePaths[idx];
-          const testImg = new Image();
-          testImg.onload = function() {
-            const hasSpace = candidatePath.includes(`Slide ${num}`);
-            const pattern = hasSpace ? `Slide ${num}` : `Slide${num}`;
-            const ext = candidatePath.slice(candidatePath.lastIndexOf('.'));
-            const base = candidatePath.substring(0, candidatePath.lastIndexOf(pattern));
-            
-            workingTemplate = (n) => `${base}${hasSpace ? 'Slide ' : 'Slide'}${n}${ext}`;
-            callback(candidatePath);
-          };
-          testImg.onerror = function() {
-            idx++;
-            testNext();
-          };
-          testImg.src = candidatePath;
-        }
-        testNext();
-      }
-
-      function probeNextImage() {
-        findWorkingPath(checkIndex, function(validPath) {
-          if (!validPath) {
-            slideOrder = detectedSlides.length > 0 ? detectedSlides : [1];
-            currentSlideIndex = 0;
-            updateSlideImage();
-            renderSlideDrawerItems();
-            togglePlayStop();
-            return;
-          }
-
-          detectedSlides.push(checkIndex);
-          checkIndex++;
-          probeNextImage();
-        });
-      }
-
-      probeNextImage();
-    }
-
-    function getSlidePath(slideNum) {
-      if (workingTemplate) return workingTemplate(slideNum);
-      return `Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide${slideNum}.PNG`;
-    }
-
-    function updateSlideImage() {
-      const slideNum = slideOrder[currentSlideIndex];
-      const imgElem = document.getElementById('slide-image');
-
-      imgElem.classList.remove('slide-animate');
-      void imgElem.offsetWidth;
-      imgElem.classList.add('slide-animate');
-
-      imgElem.dataset.attempt = "0";
-      imgElem.onerror = function() { tryAlternativeExtension(this); };
-      imgElem.src = getSlidePath(slideNum);
-    }
-
-    function tryAlternativeExtension(img) {
-      let attempt = parseInt(img.dataset.attempt || "0") + 1;
-      img.dataset.attempt = attempt;
-
-      const num = slideOrder[currentSlideIndex];
-      const CLOUDFLARE_BASE_URL = "https://emc-welcome.pages.dev/";
+    // Resolve base path pattern dynamically
+    async function resolveWorkingTemplate(num) {
+      if (workingTemplate) return workingTemplate(num);
 
       const candidatePaths = [
-        `${CLOUDFLARE_BASE_URL}Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide${num}.PNG`,
-        `${CLOUDFLARE_BASE_URL}Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide${num}.png`,
         `${CLOUDFLARE_BASE_URL}Level/${activeAudience}/${activeLevel}/${activeSP}/Slide${num}.PNG`,
         `${CLOUDFLARE_BASE_URL}Level/${activeAudience}/${activeLevel}/${activeSP}/Slide${num}.png`,
         `${CLOUDFLARE_BASE_URL}Level/${activeLevel}/${activeSP}/Slide${num}.PNG`,
-        `${CLOUDFLARE_BASE_URL}Level/${activeLevel}/${activeSP}/Slide${num}.png`
+        `${CLOUDFLARE_BASE_URL}Level/${activeLevel}/${activeSP}/Slide${num}.png`,
+        `${CLOUDFLARE_BASE_URL}Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide${num}.PNG`,
+        `${CLOUDFLARE_BASE_URL}Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide${num}.png`,
+        `${CLOUDFLARE_BASE_URL}Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide ${num}.PNG`,
+        `${CLOUDFLARE_BASE_URL}Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide ${num}.png`,
+        `${CLOUDFLARE_BASE_URL}Level/${activeAudience}/${activeLevel}/${activeSP}/Slide ${num}.PNG`,
+        `${CLOUDFLARE_BASE_URL}Level/${activeAudience}/${activeLevel}/${activeSP}/Slide ${num}.png`
       ];
 
-      if (attempt < candidatePaths.length) {
-        img.src = candidatePaths[attempt];
-      } else {
-        img.onerror = null;
-        alert(
-          `Slide Image Not Found!\n\n` +
-          `Checked path:\nhttps://emc-welcome.pages.dev/Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide${num}.PNG\n\n` +
-          `Make sure images exist on Cloudflare inside folder:\n` +
-          `Level/${activeAudience} Level/${activeLevel}/${activeSP}/`
-        );
-      }
-    }
+      for (const path of candidatePaths) {
+        const exists = await checkImageExists(path);
+        if (exists) {
+          const hasSpace = path.includes(`Slide ${num}`);
+          const pattern = hasSpace ? `Slide ${num}` : `Slide${num}`;
+          const ext = path.slice(path.lastIndexOf('.'));
+          const base = path.substring(0, path.lastIndexOf(pattern));
 
-    function prevSlide() {
-      if (slideOrder.length === 0) return;
-      currentSlideIndex = (currentSlideIndex - 1 + slideOrder.length) % slideOrder.length;
-      updateSlideImage();
-      renderSlideDrawerItems();
-    }
-
-    function nextSlide() {
-      if (slideOrder.length === 0) return;
-      currentSlideIndex = (currentSlideIndex + 1) % slideOrder.length;
-      updateSlideImage();
-      renderSlideDrawerItems();
-    }
-
-    function toggleSlideDrawer(e) {
-      if (e) e.stopPropagation();
-      const menu = document.getElementById('slideDrawerMenu');
-      menu.classList.toggle('open');
-    }
-
-    function renderSlideDrawerItems() {
-      const list = document.getElementById('slideListItems');
-      if (!list) return;
-      list.innerHTML = '';
-
-      slideOrder.forEach((slideNum, idx) => {
-        const item = document.createElement('div');
-        item.className = 'slide-item' + (idx === currentSlideIndex ? ' active-slide-item' : '');
-        
-        const thumbPath = getSlidePath(slideNum);
-        
-        item.innerHTML = `
-          <img src="${thumbPath}" class="slide-thumb" alt="Slide ${slideNum}">
-          <span style="flex: 1;">Slide ${slideNum}</span>
-          ${idx === currentSlideIndex ? '<span style="color: cyan;">▶</span>' : ''}
-        `;
-        
-        item.onclick = (e) => {
-          e.stopPropagation();
-          jumpToSlide(idx);
-        };
-        list.appendChild(item);
-      });
-    }
-
-    function jumpToSlide(index) {
-      currentSlideIndex = index;
-      updateSlideImage();
-      renderSlideDrawerItems();
-      document.getElementById('slideDrawerMenu').classList.remove('open');
-    }
-
-    /* PLAY / STOP (INCLUDES AUDIO TOGGLE) */
-    function togglePlayStop() {
-      const playStopBtn = document.getElementById('play-stop-btn');
-      const pauseBtn = document.getElementById('pause-resume-btn');
-      const bgAudio = document.getElementById('bgMusicAudio');
-
-      if (!isPlaying) {
-        isPlaying = true;
-        isPaused = false;
-        playStopBtn.textContent = '⏹ Stop';
-        playStopBtn.classList.add('active-play');
-        pauseBtn.textContent = '⏸ Pause';
-        pauseBtn.classList.remove('active-pause');
-        startTimer();
-
-        if (bgAudio && bgAudio.src && bgAudio.paused) {
-          bgAudio.play().catch(err => console.log('Audio play error:', err));
-        }
-      } else {
-        stopSlideshow();
-      }
-    }
-
-    /* PAUSE / RESUME (INCLUDES AUDIO TOGGLE) */
-    function togglePauseResume() {
-      const pauseBtn = document.getElementById('pause-resume-btn');
-      const bgAudio = document.getElementById('bgMusicAudio');
-
-      if (!isPlaying) return;
-
-      if (!isPaused) {
-        isPaused = true;
-        clearInterval(slideInterval);
-        pauseBtn.textContent = '▶ Resume';
-        pauseBtn.classList.add('active-pause');
-
-        if (bgAudio && !bgAudio.paused) {
-          bgAudio.pause();
-        }
-      } else {
-        isPaused = false;
-        pauseBtn.textContent = '⏸ Pause';
-        pauseBtn.classList.remove('active-pause');
-        startTimer();
-
-        if (bgAudio && bgAudio.src && bgAudio.paused) {
-          bgAudio.play().catch(err => console.log('Audio play error:', err));
+          workingTemplate = (n) => `${base}${hasSpace ? 'Slide ' : 'Slide'}${n}${ext}`;
+          return workingTemplate(num);
         }
       }
+      return null;
     }
 
-    function stopSlideshow() {
-      isPlaying = false;
-      isPaused = false;
-      clearInterval(slideInterval);
+    // Optimized Parallel Batch Loading
+    async function countAndLoadSlides() {
+      workingTemplate = null;
+      slideOrder = [];
 
-      const playStopBtn = document.getElementById('play-stop-btn');
-      const pauseBtn = document.getElementById('pause-resume-btn');
-
-      if (playStopBtn) {
-        playStopBtn.textContent = '▶ Play';
-        playStopBtn.classList.remove('active-play');
-      }
-      if (pauseBtn) {
-        pauseBtn.textContent = '⏸ Pause';
-        pauseBtn.classList.remove('active-pause');
-      }
-
-      stopMusic();
-    }
-
-    function startTimer() {
-      clearInterval(slideInterval);
-      slideInterval = setInterval(() => { nextSlide(); }, selectedDuration);
-    }
-
-    function toggleDurationMenu(e) {
-      if (e) e.stopPropagation();
-      const menu = document.getElementById('durationMenu');
-      const isVisible = menu.style.display === 'block';
-      menu.style.display = isVisible ? 'none' : 'block';
-      document.getElementById('musicMenu').style.display = 'none';
-      document.getElementById('volSliderBox').style.display = 'none';
-    }
-
-    function selectDuration(sec) {
-      selectedDuration = sec * 1000;
-      document.getElementById('durationSelectBtn').textContent = `⏱ ${sec} sec`;
-      document.getElementById('durationMenu').style.display = 'none';
-
-      if (isPlaying && !isPaused) {
-        startTimer();
-      }
-    }
-
-    /* SET-BASED SHUFFLE FUNCTION (Groups of 3) */
-    function toggleShuffle() {
-      isShuffled = !isShuffled;
-      updateShuffleBtnUI();
-
-      const currentNum = slideOrder[currentSlideIndex];
-
-      if (isShuffled) {
-        // 1. Ensure sequential base order first
-        let sortedSlides = [...slideOrder].sort((a, b) => a - b);
-        
-        // 2. Chunk into sets of 3 (e.g. [1,2,3], [4,5,6], ..., [28,29,30])
-        let slideSets = [];
-        for (let i = 0; i < sortedSlides.length; i += 3) {
-          slideSets.push(sortedSlides.slice(i, i + 3));
-        }
-
-        // 3. Shuffle the outer array of sets using Fisher-Yates shuffle
-        for (let i = slideSets.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [slideSets[i], slideSets[j]] = [slideSets[j], slideSets[i]];
-        }
-
-        // 4. Flatten sets back into slideOrder keeping inner 1-2-3 sequence untouched
-        slideOrder = slideSets.flat();
-      } else {
-        // Return to natural 1 through 30 sequence
-        slideOrder.sort((a, b) => a - b);
-      }
-
-      currentSlideIndex = slideOrder.indexOf(currentNum);
-      if (currentSlideIndex === -1) currentSlideIndex = 0;
-      renderSlideDrawerItems();
-    }
-
-    function updateShuffleBtnUI() {
-      const btn = document.getElementById('shuffle-btn');
-      if (isShuffled) {
-        btn.classList.add('active-shuffle');
-        btn.textContent = '🔀 Shuffled';
-      } else {
-        btn.classList.remove('active-shuffle');
-        btn.textContent = '🔀 Shuffle';
-      }
-    }
-
-    function handleBackNav() {
-      stopMusic();
-      stopSlideshow();
-
-      const viewer = document.getElementById('viewer-screen');
-      const sp = document.getElementById('sp-screen');
-
-      if (viewer.style.display === 'flex') {
-        goBackToSP();
-      } else if (sp.style.display === 'flex') {
-        goBackToLevel();
-      } else {
-        goBackToTOC();
-      }
-    }
-
-    function goBackToTOC() {
-      stopMusic();
-      document.getElementById('junior-screen').style.display = 'none';
-      document.getElementById('adult-screen').style.display = 'none';
-      document.getElementById('toc-screen').style.display = 'flex';
-      document.getElementById('top-nav').style.display = 'none';
-      document.getElementById('musicContainer').style.display = 'none';
-      document.getElementById('durationContainer').style.display = 'none';
-      document.getElementById('slideDrawerContainer').style.display = 'none';
-      document.getElementById('slideDrawerMenu').classList.remove('open');
-    }
-
-    function goBackToLevel() {
-      stopMusic();
-      document.getElementById('sp-screen').style.display = 'none';
-      if (activeAudience === 'Junior') {
-        document.getElementById('junior-screen').style.display = 'flex';
-      } else {
-        document.getElementById('adult-screen').style.display = 'flex';
-      }
-
-      document.getElementById('top-nav').classList.remove('presentation-mode');
-      document.getElementById('musicContainer').style.display = 'none';
-      document.getElementById('durationContainer').style.display = 'none';
-      document.getElementById('slideDrawerContainer').style.display = 'none';
-      document.getElementById('slideDrawerMenu').classList.remove('open');
-    }
-
-    function goBackToSP() {
-      stopSlideshow();
-      stopMusic();
-      document.getElementById('viewer-screen').style.display = 'none';
-      document.getElementById('sp-screen').style.display = 'flex';
-
-      document.getElementById('top-nav').classList.remove('presentation-mode');
-      document.getElementById('musicContainer').style.display = 'none';
-      document.getElementById('durationContainer').style.display = 'none';
-      document.getElementById('slideDrawerContainer').style.display = 'none';
-      document.getElementById('slideDrawerMenu').classList.remove('open');
-    }
-
-    function goHome() {
-      applyRandomWallpaper();
-      stopSlideshow();
-      stopMusic();
-      document.getElementById('viewer-screen').style.display = 'none';
-      document.getElementById('sp-screen').style.display = 'none';
-      document.getElementById('junior-screen').style.display = 'none';
-      document.getElementById('adult-screen').style.display = 'none';
-      document.getElementById('landing-screen').style.display = 'flex';
-      document.getElementById('toc-screen').style.display = 'none';
-      
-      const topNav = document.getElementById('top-nav');
-      topNav.style.display = 'none';
-      topNav.classList.remove('presentation-mode');
-
-      document.getElementById('musicContainer').style.display = 'none';
-      document.getElementById('durationContainer').style.display = 'none';
-      document.getElementById('slideDrawerContainer').style.display = 'none';
-      document.getElementById('slideDrawerMenu').classList.remove('open');
-    }
-
-    function stopMusic() {
-      const bgAudio = document.getElementById('bgMusicAudio');
-      if (bgAudio) {
-        bgAudio.pause();
-        bgAudio.currentTime = 0;
-        bgAudio.removeAttribute('src');
-        bgAudio.load();
-      }
-
-      const musicSelectBtn = document.getElementById('musicSelectBtn');
-      const musicControls = document.getElementById('musicControls');
-      if (musicSelectBtn) musicSelectBtn.textContent = '🎵 Select Music';
-      if (musicControls) musicControls.style.display = 'none';
-    }
-
-    function renderSongList(filterText = '') {
-      const songListItems = document.getElementById('songListItems');
-      const bgAudio = document.getElementById('bgMusicAudio');
-      const musicSelectBtn = document.getElementById('musicSelectBtn');
-      const musicControls = document.getElementById('musicControls');
-      const musicMenu = document.getElementById('musicMenu');
-
-      songListItems.innerHTML = '';
-
-      const filtered = songList.filter(song => 
-        song.title.toLowerCase().includes(filterText.toLowerCase())
-      );
-
-      if (filtered.length === 0) {
-        songListItems.innerHTML = '<div class="menu-item" style="color:#888; cursor:default;">No tracks found</div>';
+      const firstSlidePath = await resolveWorkingTemplate(1);
+      if (!firstSlidePath) {
+        slideOrder = [1];
+        updateSlideImage();
+        renderSlideDrawerItems();
         return;
       }
 
-      filtered.forEach(song => {
-        const songDiv = document.createElement('div');
-        songDiv.className = 'menu-item';
-        songDiv.textContent = song.title;
-        songDiv.addEventListener('click', (e) => {
-          e.stopPropagation();
-          bgAudio.src = song.src;
-          bgAudio.play().catch(err => console.log('Audio play error:', err));
-          musicSelectBtn.textContent = `🎵 ${song.title}`;
-          musicControls.style.display = 'flex';
-          musicMenu.style.display = 'none';
-        });
-        songListItems.appendChild(songDiv);
-      });
+      slideOrder.push(1);
+      let batchSize = 10;
+      let currentIndex = 2;
+      let keepScanning = true;
+
+      while (keepScanning) {
+        const batchProms = [];
+        for (let i = 0; i < batchSize; i++) {
+          const slideNum = currentIndex + i;
+          const url = workingTemplate(slideNum);
+          batchProms.push(checkImageExists(url).then(exists => ({ slideNum, exists })));
+        }
+
+        const results = await Promise.all(batchProms);
+        for (const res of results) {
+          if (res.exists) {
+            slideOrder.push(res.slideNum);
+          } else {
+            keepScanning = false;
+            break;
+          }
+        }
+        currentIndex += batchSize;
+      }
+
+      currentSlideIndex = 0;
+      updateSlideImage();
+      renderSlideDrawerItems();
     }
 
-    function initMusicPlayer() {
-      const bgAudio = document.getElementById('bgMusicAudio');
-      const musicSelectBtn = document.getElementById('musicSelectBtn');
-      const musicMenu = document.getElementById('musicMenu');
-      const musicSearchInput = document.getElementById('musicSearchInput');
-      const volBtn = document.getElementById('volBtn');
-      const volSliderBox = document.getElementById('volSliderBox');
-      const volSlider = document.getElementById('volSlider');
+    function updateSlideImage() {
+      if (slideOrder.length === 0) return;
+      const currentSlideNum = slideOrder[currentSlideIndex];
+      if (workingTemplate) {
+        slideImage.src = workingTemplate(currentSlideNum);
+      }
+    }
 
-      renderSongList();
-
-      musicSelectBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const isVisible = musicMenu.style.display === 'block';
-        musicMenu.style.display = isVisible ? 'none' : 'block';
-        volSliderBox.style.display = 'none';
-        document.getElementById('durationMenu').style.display = 'none';
-
-        if (!isVisible) {
-          musicSearchInput.value = '';
-          renderSongList();
-          musicSearchInput.focus();
-        }
-      });
-
-      musicSearchInput.addEventListener('input', (e) => {
-        renderSongList(e.target.value);
-      });
-
-      volBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const isVisible = volSliderBox.style.display === 'block';
-        volSliderBox.style.display = isVisible ? 'none' : 'block';
-        musicMenu.style.display = 'none';
-        document.getElementById('durationMenu').style.display = 'none';
-      });
-
-      volSlider.addEventListener('input', (e) => {
-        bgAudio.volume = parseFloat(e.target.value);
-      });
-
-      document.addEventListener('click', (e) => {
-        musicMenu.style.display = 'none';
-        volSliderBox.style.display = 'none';
-        document.getElementById('durationMenu').style.display = 'none';
+    function renderSlideDrawerItems() {
+      drawer.innerHTML = '';
+      slideOrder.forEach((slideNum, idx) => {
+        const item = document.createElement('div');
+        item.className = `drawer-item ${idx === currentSlideIndex ? 'active' : ''}`;
         
-        const slideDrawer = document.getElementById('slideDrawerMenu');
-        if (slideDrawer && !slideDrawer.contains(e.target) && e.target.id !== 'slideDrawerBtn') {
-          slideDrawer.classList.remove('open');
+        const img = document.createElement('img');
+        if (workingTemplate) {
+          img.src = workingTemplate(slideNum);
         }
+        
+        item.appendChild(img);
+        item.onclick = () => {
+          currentSlideIndex = idx;
+          updateSlideImage();
+          renderSlideDrawerItems();
+        };
+        drawer.appendChild(item);
       });
     }
+
+    playBtn.onclick = () => {
+      isPlaying = !isPlaying;
+      playBtn.textContent = isPlaying ? 'Pause' : 'Play';
+    };
+
+    prevBtn.onclick = () => {
+      if (currentSlideIndex > 0) {
+        currentSlideIndex--;
+        updateSlideImage();
+        renderSlideDrawerItems();
+      }
+    };
+
+    nextBtn.onclick = () => {
+      if (currentSlideIndex < slideOrder.length - 1) {
+        currentSlideIndex++;
+        updateSlideImage();
+        renderSlideDrawerItems();
+      }
+    };
+
+    drawerToggle.onclick = () => {
+      drawer.classList.toggle('open');
+    };
+
+    // Initial Load
+    countAndLoadSlides();
   </script>
 </body>
 </html>
