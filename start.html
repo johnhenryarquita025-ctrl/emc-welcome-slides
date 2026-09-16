@@ -1352,19 +1352,20 @@
           return;
         }
 
-        const candidatePaths = [
-          `Level/${activeAudience}/${activeLevel}/${activeSP}/Slide${num}.PNG`,
-          `Level/${activeAudience}/${activeLevel}/${activeSP}/Slide${num}.png`,
-          `Level/${activeLevel}/${activeSP}/Slide${num}.PNG`,
-          `Level/${activeLevel}/${activeSP}/Slide${num}.png`,
-          `Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide${num}.PNG`,
-          `Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide${num}.png`,
-          `Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide ${num}.PNG`,
-          `Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide ${num}.png`,
-          `Level/${activeAudience}/${activeLevel}/${activeSP}/Slide ${num}.PNG`,
-          `Level/${activeAudience}/${activeLevel}/${activeSP}/Slide ${num}.png`
-        ];
+        const CLOUDFLARE_BASE_URL = "https://emc-welcome.pages.dev/";
 
+        const candidatePaths = [
+          `${CLOUDFLARE_BASE_URL}Level/${activeAudience}/${activeLevel}/${activeSP}/Slide${num}.PNG`,
+          `${CLOUDFLARE_BASE_URL}Level/${activeAudience}/${activeLevel}/${activeSP}/Slide${num}.png`,
+          `${CLOUDFLARE_BASE_URL}Level/${activeLevel}/${activeSP}/Slide${num}.PNG`,
+          `${CLOUDFLARE_BASE_URL}Level/${activeLevel}/${activeSP}/Slide${num}.png`,
+          `${CLOUDFLARE_BASE_URL}Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide${num}.PNG`,
+          `${CLOUDFLARE_BASE_URL}Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide${num}.png`,
+          `${CLOUDFLARE_BASE_URL}Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide ${num}.PNG`,
+          `${CLOUDFLARE_BASE_URL}Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide ${num}.png`,
+          `${CLOUDFLARE_BASE_URL}Level/${activeAudience}/${activeLevel}/${activeSP}/Slide ${num}.PNG`,
+          `${CLOUDFLARE_BASE_URL}Level/${activeAudience}/${activeLevel}/${activeSP}/Slide ${num}.png`
+        ];
         let idx = 0;
         function testNext() {
           if (idx >= candidatePaths.length) {
@@ -1434,13 +1435,15 @@
       img.dataset.attempt = attempt;
 
       const num = slideOrder[currentSlideIndex];
+     const CLOUDFLARE_BASE_URL = "https://emc-welcome.pages.dev/";
+
       const candidatePaths = [
-        `Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide${num}.PNG`,
-        `Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide${num}.png`,
-        `Level/${activeAudience}/${activeLevel}/${activeSP}/Slide${num}.PNG`,
-        `Level/${activeAudience}/${activeLevel}/${activeSP}/Slide${num}.png`,
-        `Level/${activeLevel}/${activeSP}/Slide${num}.PNG`,
-        `Level/${activeLevel}/${activeSP}/Slide${num}.png`
+        `${CLOUDFLARE_BASE_URL}Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide${num}.PNG`,
+        `${CLOUDFLARE_BASE_URL}Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide${num}.png`,
+        `${CLOUDFLARE_BASE_URL}Level/${activeAudience}/${activeLevel}/${activeSP}/Slide${num}.PNG`,
+        `${CLOUDFLARE_BASE_URL}Level/${activeAudience}/${activeLevel}/${activeSP}/Slide${num}.png`,
+        `${CLOUDFLARE_BASE_URL}Level/${activeLevel}/${activeSP}/Slide${num}.PNG`,
+        `${CLOUDFLARE_BASE_URL}Level/${activeLevel}/${activeSP}/Slide${num}.png`
       ];
 
       if (attempt < candidatePaths.length) {
@@ -1449,8 +1452,8 @@
         img.onerror = null;
         alert(
           `Slide Image Not Found!\n\n` +
-          `Checked path:\nLevel/${activeAudience} Level/${activeLevel}/${activeSP}/Slide${num}.PNG\n\n` +
-          `Make sure images are named Slide1.PNG, Slide2.PNG, etc., inside folder:\n` +
+          `Checked path:\nhttps://emc-welcome.pages.dev/Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide${num}.PNG\n\n` +
+          `Make sure images exist on Cloudflare inside folder:\n` +
           `Level/${activeAudience} Level/${activeLevel}/${activeSP}/`
         );
       }
