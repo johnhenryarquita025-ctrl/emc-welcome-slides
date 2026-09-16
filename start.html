@@ -1352,8 +1352,6 @@
           return;
         }
 
-        const CLOUDFLARE_BASE_URL = "https://emc-welcome.pages.dev/";
-
         const candidatePaths = [
           `${CLOUDFLARE_BASE_URL}Level/${activeAudience}/${activeLevel}/${activeSP}/Slide${num}.PNG`,
           `${CLOUDFLARE_BASE_URL}Level/${activeAudience}/${activeLevel}/${activeSP}/Slide${num}.png`,
@@ -1435,7 +1433,7 @@
       img.dataset.attempt = attempt;
 
       const num = slideOrder[currentSlideIndex];
-     const CLOUDFLARE_BASE_URL = "https://emc-welcome.pages.dev/";
+      const CLOUDFLARE_BASE_URL = "https://emc-welcome.pages.dev/";
 
       const candidatePaths = [
         `${CLOUDFLARE_BASE_URL}Level/${activeAudience} Level/${activeLevel}/${activeSP}/Slide${num}.PNG`,
